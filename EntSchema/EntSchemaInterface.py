@@ -6,6 +6,10 @@ from typing import List
 
 class EntSchemaInterface(ABC):
     @abstractmethod
+    def getTableName() -> str:
+        pass
+
+    @abstractmethod
     def getFields() -> List[EntField]:
         pass
 
