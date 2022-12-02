@@ -46,7 +46,8 @@ class EntMutatorInterface(ABC):
         ent_schema = ent.getEntSchema()
         SQLHelper.updateToTable(
             table_name=ent_schema.getTableName(),
-            updated_string=SQLHelper.createUpdateString(ent.__dict__),
+            updated_string=SQLHelper.createUpdateString(ent.toDict()),
+            id=ent.getID(),
         )
 
     @staticmethod

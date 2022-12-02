@@ -41,7 +41,7 @@ class SQLHelper:
         return '"' + '","'.join(str_args) + '"'
 
     @staticmethod
-    def updateToTable(table_name: str, updated_string: str) -> None:
+    def updateToTable(table_name: str, updated_string: str, id: int) -> None:
         """This method helps to update an existed record in the database
         Parameter:
             table_name: the table we want to update
@@ -49,7 +49,8 @@ class SQLHelper:
         """
         cursor, connection = SQLHelper.initializeCursorAndConnection()
         sql = f"""UPDATE {table_name}
-                  SET {updated_string};
+                  SET {updated_string}
+                  WHERE id = {id};
                """
         cursor.execute(sql)
         connection.commit()
@@ -61,7 +62,7 @@ class SQLHelper:
         Parameters:
             update_dict (dict): a dictionary with key is a field name and value is the value of that field
         """
-        return ",".join([f"{key} = {value}" for key, value in update_dict.items()])
+        return ",".join([f'{key} = "{value}"' for key, value in update_dict.items()])
 
     @staticmethod
     def deleteRecordFromTable(table_name: str, record_id: int) -> None:

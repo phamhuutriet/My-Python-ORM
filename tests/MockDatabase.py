@@ -35,9 +35,11 @@ class MockDatabase:
         return '"' + '","'.join(str_args) + '"'
 
     @staticmethod
-    def isExistInTable(table_name, id):
+    def isExistInTable(table_name: str, id: int, optional_condition: str = ""):
         cursor, connection = MockDatabase.initializeCursorAndConnection()
-        cursor.execute(f"SELECT * FROM {table_name} WHERE id = {id};")
+        cursor.execute(
+            f"SELECT * FROM {table_name} WHERE id = {id} {optional_condition};"
+        )
         connection.commit()
         isExist = len(cursor.fetchall()) > 0
         connection.close()

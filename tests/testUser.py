@@ -64,3 +64,18 @@ class TestUser(TestCase):
                     table_name=friend.getEntSchema().getTableName(), id=friend.getID()
                 )
             )
+
+    @patch("EntMutator.SQLHelper.SQLHelper.getDatabasePath")
+    def testUpdate(self, mocked_get_path: MagicMock):
+        mocked_get_path.return_value = DatabaseEnums.TEST_DATABASE_PATH.value
+        user = User(name="Triet", age=24)
+        UserMutator.create(user)
+        user.setName("Mai")
+        UserMutator.update(user)
+        self.assertTrue(
+            MockDatabase.isExistInTable(
+                table_name=user.getEntSchema().getTableName(),
+                id=user.getID(),
+                optional_condition='AND name="Mai"',
+            )
+        )

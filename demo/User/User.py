@@ -22,6 +22,12 @@ class User(EntInterface):
     def setID(self, id: int) -> None:
         self.id = id
 
+    def getName(self) -> str:
+        return self.name
+
+    def setName(self, name: str) -> None:
+        self.name = name
+
     def addFriend(self, friend: User) -> None:
         self.friends.append(friend)
 
