@@ -79,3 +79,56 @@ class TestUser(TestCase):
                 optional_condition='AND name="Mai"',
             )
         )
+
+    @patch("EntMutator.SQLHelper.SQLHelper.getDatabasePath")
+    def testDelete(self, mocked_get_path: MagicMock):
+        mocked_get_path.return_value = DatabaseEnums.TEST_DATABASE_PATH.value
+        user = User(name="Triet", age=24)
+        # Test if user existed
+        UserMutator.create(user)
+        self.assertTrue(
+            MockDatabase.isExistInTable(
+                table_name=user.getEntSchema().getTableName(), id=user.getID()
+            )
+        )
+
+        # Test if user is not existed
+        UserMutator.delete(user)
+        self.assertFalse(
+            MockDatabase.isExistInTable(
+                table_name=user.getEntSchema().getTableName(), id=user.getID()
+            )
+        )
+
+    @patch("EntMutator.SQLHelper.SQLHelper.getDatabasePath")
+    def testIsExisted(self, mocked_get_path: MagicMock):
+        mocked_get_path.return_value = DatabaseEnums.TEST_DATABASE_PATH.value
+        user = User(name="Triet", age=23)
+        self.assertFalse(UserMutator.isExisted(user))
+        UserMutator.create(user)
+        self.assertTrue(UserMutator.isExisted(user))
+
+    @patch("EntMutator.SQLHelper.SQLHelper.getDatabasePath")
+    def testPersist(self, mocked_get_path: MagicMock):
+        mocked_get_path.return_value = DatabaseEnums.TEST_DATABASE_PATH.value
+        user = User(name="Triet", age=22)
+
+        # Test if user existed
+        UserMutator.persist(user)
+        self.assertTrue(
+            MockDatabase.isExistInTable(
+                table_name=user.getEntSchema().getTableName(), id=user.getID()
+            )
+        )
+
+        # Test if update successfully
+        user.setName("Mai")
+        user.setAge(23)
+        UserMutator.persist(user)
+        self.assertTrue(
+            MockDatabase.isExistInTable(
+                table_name=user.getEntSchema().getTableName(),
+                id=user.getID(),
+                optional_condition='AND name="Mai" AND age=23',
+            )
+        )

@@ -28,6 +28,12 @@ class User(EntInterface):
     def setName(self, name: str) -> None:
         self.name = name
 
+    def getAge(self) -> int:
+        return self.age
+
+    def setAge(self, age: int) -> None:
+        self.age = age
+
     def addFriend(self, friend: User) -> None:
         self.friends.append(friend)
 

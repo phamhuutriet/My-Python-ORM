@@ -7,6 +7,7 @@ from typing import List
 class EntMutatorInterface(ABC):
     @staticmethod
     def create(ent: EntInterface) -> None:
+        """This method creates the ent and its edges"""
         EntMutatorInterface.createSingle(ent)
         EntMutatorInterface.createEdge(ent=ent, edges=ent.getEdges())
 

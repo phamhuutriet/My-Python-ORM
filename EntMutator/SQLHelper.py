@@ -85,10 +85,10 @@ class SQLHelper:
             record_id: the id of the record we want to check
         """
         cursor, connection = SQLHelper.initializeCursorAndConnection()
-        sql = f"SELECT 1 FROM {table_name} WHERE id = {record_id};"
+        sql = f"SELECT * FROM {table_name} WHERE id = {record_id};"
         cursor.execute(sql)
         connection.commit()
-        is_existed = cursor.fetchone()[0] == 1
+        is_existed = len(cursor.fetchall()) == 1
         connection.close()
         return is_existed
 

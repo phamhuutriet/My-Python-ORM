@@ -36,6 +36,13 @@ class MockDatabase:
 
     @staticmethod
     def isExistInTable(table_name: str, id: int, optional_condition: str = ""):
+        """Check if an entity is existed in a table by checking its ID (by default),
+        and with optional condition (null by default)
+        Parameter:
+            table_name: name of the table
+            id: the id of the entity
+            optional_condition: WHERE condition other than id
+        """
         cursor, connection = MockDatabase.initializeCursorAndConnection()
         cursor.execute(
             f"SELECT * FROM {table_name} WHERE id = {id} {optional_condition};"
