@@ -6,13 +6,17 @@ from typing import List
 
 class EntSchemaInterface(ABC):
     @abstractmethod
-    def getTableName() -> str:
-        pass
+    def getTableName(self, show_fields: bool = False) -> str:
+        """Return the table name that stores this entity
+        Parameters:
+            show_fields (bool): if show the field columns in table name.
+            Example: User(name, age) vs User
+        """
 
     @abstractmethod
-    def getFields() -> List[EntField]:
-        pass
+    def getFields(self) -> List[EntField]:
+        """Configure the fields of this entity"""
 
     @abstractmethod
-    def getEdges() -> List[EntEdge]:
-        pass
+    def getEdges(self) -> List[EntEdge]:
+        """Configure the edges of this entity"""

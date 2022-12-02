@@ -15,27 +15,28 @@ class EntMutatorInterface(ABC):
         """This method create the ent in the database with no edges"""
         ent_schema = ent.getEntSchema()
         ent_ID = SQLHelper.insertToTable(
-            table_name=ent_schema.getTableName(),
-            inserted_value_str=SQLHelper.createInsertValue(ent.__dict__),
+            table_name=ent_schema.getTableName(show_fields=True),
+            inserted_value_str=SQLHelper.createInsertValue(ent.toDict()),
         )
         ent.setID(ent_ID)
 
     @staticmethod
-    def createEdge(ent: EntInterface, edges: List[EntInterface]) -> None:
+    def createEdge(ent: EntInterface, edges: dict[EntInterface, str]) -> None:
         """This method create the edge"""
-        for edge in edges:
-            EntMutatorInterface.createSingle(edge)
-            EntMutatorInterface.insertRelationshipRecord(ent, edge)
+        for edge_object, edge_name in edges.items():
+            EntMutatorInterface.createSingle(edge_object)
+            EntMutatorInterface.insertRelationshipRecord(
+                ent=ent, edge=edge_object, relationship=edge_name
+            )
 
     @staticmethod
-    def insertRelationshipRecord(ent1: EntInterface, ent2: EntInterface) -> None:
+    def insertRelationshipRecord(
+        ent: EntInterface, edge: EntInterface, relationship: str
+    ) -> None:
         SQLHelper.insertToTable(
-            table_name=SQLHelper.createRelationshipTableName(
-                table_name1=ent1.getEntSchema().getTableName(),
-                table_name2=ent2.getEntSchema().getTableName(),
-            ),
+            table_name=f"{ent.getEntSchema().getTableName()}_{relationship}",
             inserted_value_str=SQLHelper.createInsertValue(
-                {"id1": ent1.getID(), "id2": ent2.getID()}
+                {"id1": ent.getID(), "id2": edge.getID()}
             ),
         )
 

@@ -1,13 +1,16 @@
 from enums.DatabaseEnums import DatabaseEnums
-from Exceptions.DuplicateRecordError import DuplicateRecordError
 import sqlite3
 
 
 class SQLHelper:
     @staticmethod
+    def getDatabasePath() -> str:
+        return DatabaseEnums.DATABASE_PATH.value
+
+    @staticmethod
     def initializeCursorAndConnection():
         """This method initialize the cursor and the connection of sqlite server"""
-        connection = sqlite3.connect(DatabaseEnums.DATABASE_PATH.value)
+        connection = sqlite3.connect(SQLHelper.getDatabasePath())
         cursor = connection.cursor()
         connection.commit()
         return cursor, connection
@@ -20,11 +23,8 @@ class SQLHelper:
             inserted_value_str: the string contains the inserted value in the form of VALUE in SQL
         """
         cursor, connection = SQLHelper.initializeCursorAndConnection()
-        try:
-            cursor.execute(f"INSERT INTO {table_name} VALUES ({inserted_value_str});")
-            connection.commit()
-        except:
-            raise DuplicateRecordError
+        cursor.execute(f"INSERT INTO {table_name} VALUES ({inserted_value_str});")
+        connection.commit()
         cursor.execute("SELECT last_insert_rowid();")
         connection.commit()
         id = cursor.fetchone()[0]
@@ -94,3 +94,19 @@ class SQLHelper:
     @staticmethod
     def createRelationshipTableName(table_name1: str, table_name2: str) -> str:
         return f"{table_name1}_{table_name2}({table_name1}, {table_name2})"
+
+    @staticmethod
+    def createTable(table_name: str, table_description: str) -> None:
+        """This methods create a table in the database
+        Parameters:
+            table_name: the name of the table
+            table_description: the constraint string inside the create table parenthesese
+        """
+        cursor, connection = SQLHelper.initializeCursorAndConnection()
+        cursor.execute(
+            f"""CREATE TABLE {table_name} (
+                        {table_description}
+        );"""
+        )
+        connection.commit()
+        connection.close()
