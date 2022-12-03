@@ -1,25 +1,25 @@
 from abc import ABC, abstractmethod
 from typing import List
-from EntQuerier.EntQueryFilter import EntQueryFilter
 from EntMutator.SQLHelper import SQLHelper
 from EntSchema.EntSchemaInterface import EntSchemaInterface
 from Ent.EntInterface import EntInterface
+from EntQuerier.Predicator import Predicator
 
 
 class EntQuerierInterface(ABC):
-    def queryOne(self, filter: EntQueryFilter) -> EntInterface:
+    def queryOne(self, filter: Predicator) -> EntInterface:
         """This method help queries one ent"""
         result = SQLHelper.queryOne(
             table_name=self.getEntSchema().getTableName(),
-            filter_string=filter.toSQLString(),
+            filter_string=str(filter),
         )
         return self.processOneResult(result)
 
-    def queryMany(self, filter: EntQueryFilter) -> List[EntInterface]:
+    def queryMany(self, filter: Predicator) -> List[EntInterface]:
         """This method help queries many ents"""
         results = SQLHelper.queryMany(
             table_name=self.getEntSchema().getTableName(),
-            filter_string=filter.toSQLString(),
+            filter_string=str(filter),
         )
         return self.processManyResults(results)
 

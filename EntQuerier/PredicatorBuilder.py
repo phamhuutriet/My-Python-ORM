@@ -44,4 +44,6 @@ class PredicatorBuilder:
     def combinePredicators(
         p1: Predicator, p2: Predicator, relationship: PredicatorEnums
     ) -> Predicator:
+        p1.setNested()
+        p2.setNested()
         return Predicator(p1, relationship, p2)

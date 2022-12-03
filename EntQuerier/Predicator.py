@@ -5,15 +5,24 @@ from typing import List
 
 class Predicator:
     def __init__(
-        self, field_name, comparator: PredicatorEnums, value, is_not: bool = False
+        self,
+        field_name,
+        comparator: PredicatorEnums,
+        value,
+        is_not: bool = False,
     ) -> None:
         self.field_name = field_name
         self.comparator = comparator
         self.value = value
         self.is_not = is_not
+        self.is_nested = False
+
+    def setNested(self) -> None:
+        self.is_nested = True
 
     def convertValueToString(self) -> str:
         if isinstance(self.value, List):
+            # Add "" for each string value
             for i, value in enumerate(self.value):
                 if isinstance(value, str):
                     self.value[i] = f'"{value}"'
@@ -24,7 +33,8 @@ class Predicator:
 
     def __str__(self) -> str:
         not_str = "NOT" if self.is_not else ""
-        return f"{not_str} {str(self.field_name)} {self.comparator.value} {self.convertValueToString()}".strip()
+        body = f"{not_str} {str(self.field_name)} {self.comparator.value} {self.convertValueToString()}".strip()
+        return f"({body})" if self.is_nested else body
 
     def __eq__(self, __o: Predicator) -> bool:
         return (
