@@ -1,4 +1,5 @@
 from enums.DatabaseEnums import DatabaseEnums
+from typing import List
 import sqlite3
 
 
@@ -111,3 +112,37 @@ class SQLHelper:
         )
         connection.commit()
         connection.close()
+
+    @staticmethod
+    def queryOne(table_name: str, filter_string: str) -> dict:
+        """This method queries one result based on table name and filter string
+        Parameters:
+            table_name: the name of the table
+            filter_string: the SQL string for the conditional check (after WHERE)
+        Return:
+            a single dict contain one fetched result
+        """
+        cursor, connection = SQLHelper.initializeCursorAndConnection()
+        sql = f"SELECT * FROM {table_name} WHERE {filter_string};"
+        cursor.execute(sql)
+        connection.commit()
+        ans = cursor.fetchone()[0]
+        connection.close()
+        return ans
+
+    @staticmethod
+    def queryMany(table_name: str, filter_string: str) -> List[dict]:
+        """This method queries a list of results based on table name and filter string
+        Parameters:
+            table_name: the name of the table
+            filter_string: the SQL string for the conditional check (after WHERE)
+        Return:
+            a list of dicts contain many fetched results
+        """
+        cursor, connection = SQLHelper.initializeCursorAndConnection()
+        sql = f"SELECT * FROM {table_name} WHERE {filter_string};"
+        cursor.execute(sql)
+        connection.commit()
+        ans = list(cursor.fetchall())
+        connection.close()
+        return ans
