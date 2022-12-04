@@ -45,10 +45,10 @@ class EntQuerierInterface(ABC):
     def processOneResult(result: dict) -> EntInterface:
         """This method process the dict result and pass it to Ent class init"""
 
-    @staticmethod
-    @abstractmethod
-    def processManyResults(results: List[dict]) -> List[EntInterface]:
+    @classmethod
+    def processManyResults(cls, results: List[dict]) -> List[EntInterface]:
         """This method process the list of dicts result and pass it to list of Ents"""
+        return list(cls.processOneResult(result) for result in results)
 
     @classmethod
     def getFieldsNames(cls) -> List[str]:

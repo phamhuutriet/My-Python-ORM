@@ -17,9 +17,5 @@ class UserQuerier(EntQuerierInterface):
         return user
 
     @staticmethod
-    def processManyResults(results: List[dict]) -> List[EntInterface]:
-        return list(UserQuerier.processOneResult(result) for result in results)
-
-    @staticmethod
     def getEntSchema() -> EntSchemaInterface:
         return UserSchema()
