@@ -11,11 +11,8 @@ class UserSchema(EntSchemaInterface):
     def __init__(self) -> None:
         pass
 
-    def getTableName(self, show_fields: bool = False) -> str:
-        if not show_fields:
-            return DatabaseEnums.USER_TABLE.value
-        fields_string = ",".join([field.getName() for field in self.getFields()])
-        return f"{DatabaseEnums.USER_TABLE.value}({fields_string})"
+    def tableName(self) -> DatabaseEnums:
+        return DatabaseEnums.USER_TABLE
 
     def getFields(self) -> List[EntField]:
         return [
