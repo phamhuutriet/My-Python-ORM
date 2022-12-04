@@ -43,3 +43,13 @@ class User(EntInterface):
     def getEdges(self) -> dict[EntInterface, str]:
         # Must have a generalized conversion
         return {friend: "Friends" for friend in self.friends}
+
+    def __eq__(self, __o: User) -> bool:
+        return (
+            self.getID() == __o.getID()
+            and self.name == __o.name
+            and self.age == __o.age
+        )
+
+    def __hash__(self) -> int:
+        return hash((self.id, self.name, self.age))

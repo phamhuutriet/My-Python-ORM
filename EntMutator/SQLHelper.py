@@ -1,5 +1,6 @@
 from enums.DatabaseEnums import DatabaseEnums
 from typing import List
+from Exceptions.NoRecordFound import NoRecordError
 import sqlite3
 
 
@@ -63,7 +64,13 @@ class SQLHelper:
         Parameters:
             update_dict (dict): a dictionary with key is a field name and value is the value of that field
         """
-        return ",".join([f'{key} = "{value}"' for key, value in update_dict.items()])
+        strings = []
+        for key, value in update_dict.items():
+            if isinstance(value, str):
+                strings.append(f'{key} = "{value}"')
+            else:
+                strings.append(f"{key} = {value}")
+        return ",".join(strings)
 
     @staticmethod
     def deleteRecordFromTable(table_name: str, record_id: int) -> None:
@@ -114,7 +121,11 @@ class SQLHelper:
         connection.close()
 
     @staticmethod
-    def queryOne(table_name: str, filter_string: str) -> dict:
+    def createTableFieldsString(fields: List[str]) -> str:
+        return ", ".join(fields)
+
+    @staticmethod
+    def queryOne(table_name: str, filter_string: str, fields: List[str]) -> dict:
         """This method queries one result based on table name and filter string
         Parameters:
             table_name: the name of the table
@@ -123,15 +134,20 @@ class SQLHelper:
             a single dict contain one fetched result
         """
         cursor, connection = SQLHelper.initializeCursorAndConnection()
-        sql = f"SELECT * FROM {table_name} WHERE {filter_string};"
+        sql = f"SELECT {SQLHelper.createTableFieldsString(fields)} FROM {table_name} WHERE {filter_string};"
         cursor.execute(sql)
         connection.commit()
-        ans = cursor.fetchone()[0]
+        result = cursor.fetchone()
         connection.close()
+        if not result:
+            raise NoRecordError
+        ans = {}
+        for key, value in zip(fields, result):
+            ans[key] = value
         return ans
 
     @staticmethod
-    def queryMany(table_name: str, filter_string: str) -> List[dict]:
+    def queryMany(table_name: str, filter_string: str, fields: List[str]) -> List[dict]:
         """This method queries a list of results based on table name and filter string
         Parameters:
             table_name: the name of the table
@@ -140,9 +156,16 @@ class SQLHelper:
             a list of dicts contain many fetched results
         """
         cursor, connection = SQLHelper.initializeCursorAndConnection()
-        sql = f"SELECT * FROM {table_name} WHERE {filter_string};"
+        sql = f"SELECT {SQLHelper.createTableFieldsString(fields)} FROM {table_name} WHERE {filter_string};"
         cursor.execute(sql)
         connection.commit()
         ans = list(cursor.fetchall())
         connection.close()
+        if len(ans) == 0:
+            raise NoRecordError
+        for i, result in enumerate(ans):
+            record = {}
+            for key, value in zip(fields, result):
+                record[key] = value
+            ans[i] = record
         return ans

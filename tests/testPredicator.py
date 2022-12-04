@@ -192,7 +192,7 @@ class TestPredicator(TestCase):
             PredicatorBuilder.equalString("b", "A"),
         ]
         relationship_list = [PredicatorEnums.AND, PredicatorEnums.OR]
-        predicator_str_list = ['a = 5 AND b = "A"', 'a = 5 OR b = "A"']
+        predicator_str_list = ['(a = 5) AND (b = "A")', '(a = 5) OR (b = "A")']
         return (
             (p1, p2, relationship, predicator_str)
             for p1, p2, relationship, predicator_str in zip(

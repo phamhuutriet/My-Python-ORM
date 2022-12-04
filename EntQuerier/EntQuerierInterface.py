@@ -1,36 +1,55 @@
 from abc import ABC, abstractmethod
+from Exceptions.NoRecordFound import NoRecordError
 from typing import List
 from EntMutator.SQLHelper import SQLHelper
 from EntSchema.EntSchemaInterface import EntSchemaInterface
 from Ent.EntInterface import EntInterface
+from Ent.NullEnt import NullEnt
 from EntQuerier.Predicator import Predicator
 
 
 class EntQuerierInterface(ABC):
-    def queryOne(self, filter: Predicator) -> EntInterface:
+    @classmethod
+    def queryOne(cls, filter: Predicator) -> EntInterface:
         """This method help queries one ent"""
-        result = SQLHelper.queryOne(
-            table_name=self.getEntSchema().getTableName(),
-            filter_string=str(filter),
-        )
-        return self.processOneResult(result)
+        try:
+            result = SQLHelper.queryOne(
+                table_name=cls.getEntSchema().getTableName(),
+                filter_string=str(filter),
+                fields=cls.getFieldsNames(),
+            )
+            return cls.processOneResult(result)
+        except NoRecordError:
+            return NullEnt()
 
-    def queryMany(self, filter: Predicator) -> List[EntInterface]:
+    @classmethod
+    def queryMany(cls, filter: Predicator) -> List[EntInterface]:
         """This method help queries many ents"""
-        results = SQLHelper.queryMany(
-            table_name=self.getEntSchema().getTableName(),
-            filter_string=str(filter),
-        )
-        return self.processManyResults(results)
+        try:
+            results = SQLHelper.queryMany(
+                table_name=cls.getEntSchema().getTableName(),
+                filter_string=str(filter),
+                fields=cls.getFieldsNames(),
+            )
+            return cls.processManyResults(results)
+        except NoRecordError:
+            return [NullEnt()]
 
+    @staticmethod
     @abstractmethod
-    def getEntSchema(self) -> EntSchemaInterface:
+    def getEntSchema() -> EntSchemaInterface:
         """Return the ent schema type of this ent querier"""
 
+    @staticmethod
     @abstractmethod
-    def processOneResult(self, result: dict) -> EntInterface:
+    def processOneResult(result: dict) -> EntInterface:
         """This method process the dict result and pass it to Ent class init"""
 
+    @staticmethod
     @abstractmethod
-    def processManyResults(self, results: List[dict]) -> List[EntInterface]:
+    def processManyResults(results: List[dict]) -> List[EntInterface]:
         """This method process the list of dicts result and pass it to list of Ents"""
+
+    @classmethod
+    def getFieldsNames(cls) -> List[str]:
+        return cls.getEntSchema().getFieldsNames() + ["id"]

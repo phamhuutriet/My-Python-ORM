@@ -9,7 +9,7 @@ class TestSQLHelper(unittest.TestCase):
             {"name": "Triet", "age": 18},
             {"name": "Mai", "balance": "1000"},
         ]
-        result_str_list = ["name = Triet,age = 18", "name = Mai,balance = 1000"]
+        result_str_list = ['name = "Triet",age = 18', 'name = "Mai",balance = "1000"']
         return (
             (update_dict, result_str)
             for update_dict, result_str in zip(update_dict_list, result_str_list)

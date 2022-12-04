@@ -20,3 +20,6 @@ class EntSchemaInterface(ABC):
     @abstractmethod
     def getEdges(self) -> List[EntEdge]:
         """Configure the edges of this entity"""
+
+    def getFieldsNames(self) -> List[str]:
+        return list(field.getName() for field in self.getFields())
