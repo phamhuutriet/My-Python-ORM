@@ -1,5 +1,6 @@
 from EntSchema.EntSchemaInterface import EntSchemaInterface
 from CodeGenerator.CodegenHelper import CodegenHelper
+import os
 
 
 class EntClassCodegen:
@@ -7,6 +8,7 @@ class EntClassCodegen:
         self.schema = schema
 
     def run(self) -> None:
+        self.createDirectory()
         # Generate Ent
 
         # Generate EntMutator
@@ -16,6 +18,9 @@ class EntClassCodegen:
 
         # Generate SQL tables
         pass
+
+    def createDirectory(self) -> None:
+        os.mkdir(f"./demo/{self.schema.tableName().value}")
 
     def createEntMutator(self) -> None:
         template_path = "./CodeGenerator/templates/EntMutatorTemplate.txt"
