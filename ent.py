@@ -1,4 +1,3 @@
-from CodeGenerator.EntClassCodegen import EntClassCodegen
 import sys
 import os
 

@@ -19,8 +19,9 @@ class EntClassCodegen:
 
     def createEntMutator(self) -> None:
         template_path = "./CodeGenerator/templates/EntMutatorTemplate.txt"
-        parameters_dict = {"__MUTATOR__": self.schema.tableName().value}
+        mutator_name = f"{self.schema.tableName().value}Mutator"
+        parameters_dict = {"__MUTATOR__": mutator_name}
         CodegenHelper.writeFile(
-            destined_path=f"./demo/{self.schema.tableName().value}",
+            destined_path=f"./demo/{self.schema.tableName().value}/{mutator_name}.py",
             file_context=CodegenHelper.replace(template_path, parameters_dict),
         )
