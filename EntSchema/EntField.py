@@ -21,5 +21,11 @@ class EntField:
     def getType(self) -> EntFieldEnums:
         return self.type
 
+    def isPrimary(self) -> bool:
+        return self.is_primary
+
+    def isUnique(self) -> bool:
+        return self.is_unique
+
     def __eq__(self, __o: EntField) -> bool:
         return self.__dict__ == __o.__dict__

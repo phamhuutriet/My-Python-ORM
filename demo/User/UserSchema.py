@@ -16,7 +16,11 @@ class UserSchema(EntSchemaInterface):
 
     def getFields(self) -> List[EntField]:
         return [
-            EntFieldBuilder.field().name("name").type(EntFieldEnums.STRING).build(),
+            EntFieldBuilder.field()
+            .name("name")
+            .unique()
+            .type(EntFieldEnums.STRING)
+            .build(),
             EntFieldBuilder.field().name("age").type(EntFieldEnums.INT).build(),
         ]
 

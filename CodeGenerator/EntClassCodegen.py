@@ -1,18 +1,17 @@
 from EntSchema.EntSchemaInterface import EntSchemaInterface
 from CodeGenerator.CodegenHelper import CodegenHelper
 from enums.EntFieldEnums import EntFieldEnums
+from EntMutator.SQLHelper import SQLHelper
 import os
 
 
 class EntClassCodegen:
     def __init__(self, schema: EntSchemaInterface) -> None:
         self.schema = schema
-
         # destined file paths
         self.MUTATOR_PATH = "./CodeGenerator/templates/EntMutatorTemplate.txt"
         self.SCHEMA_PATH = "./CodeGenerator/templates/EntQuerierTemplate.txt"
         self.ENT_PATH = "./CodeGenerator/templates/EntTemplate.txt"
-
         # String const
         self.ENT = self.schema.tableName().value
         self.SCHEMA = f"{self.ENT}Schema"
@@ -25,23 +24,31 @@ class EntClassCodegen:
 
     def run(self) -> None:
         self.createDirectory()
-        # Generate Ent
         self.createEnt()
-
-        # Generate EntMutator
         self.createEntMutator()
-
-        # Generate EntQuerier
         self.createEntQuerier()
-
-        # Generate SQL tables
-        pass
+        SQLHelper.createTable(
+            table_name=self.ENT, table_description=self.getTableDescriptionString()
+        )
 
     def createDirectory(self) -> None:
         try:
             os.mkdir(f"./demo/{self.ENT}")
         except:
             print("Directory already existed. Move to generating other classes")
+
+    def createEnt(self) -> None:
+        parameters_dict = {
+            "__SCHEMA_PATH__": f"demo.{self.ENT}.{self.SCHEMA}",
+            "__ENT_SCHEMA__": self.SCHEMA,
+            "__INIT_WITH_DEFAULT__": self.getInitStringWithDefault(),
+            "__SET_FIELDS__": self.getSetFieldsString(),
+            "__FIELDS_GETTERS_SETTERS_METHODS__": self.getFieldsGetterAndSetterMethods(),
+        }
+        CodegenHelper.writeFile(
+            destined_path=f"./demo/{self.ENT}/{self.ENT}.py",
+            file_context=CodegenHelper.replace(self.ENT_PATH, parameters_dict),
+        )
 
     def createEntMutator(self) -> None:
         mutator_name = f"{self.ENT}Mutator"
@@ -64,6 +71,16 @@ class EntClassCodegen:
             destined_path=f"./demo/{self.ENT}/{querier_name}.py",
             file_context=CodegenHelper.replace(self.SCHEMA_PATH, parameters_dict),
         )
+
+    def getTableDescriptionString(self) -> str:
+        field_desc_list = []
+        for field in self.schema.getFields():
+            unique = "UNIQUE" if field.isUnique() else ""
+            field_desc_list.append(
+                f"{field.getName()} {field.getType().value} {unique}"
+            )
+        field_desc_str = ", ".join(field_desc_list)
+        return f"id integer, {field_desc_str}, PRIMARY KEY (id)"
 
     def getInitString(self) -> str:
         set_fields_strings = []
@@ -112,16 +129,3 @@ class EntClassCodegen:
         self.{field_name} = {field_name}
         """
         return getter_s + "\n" + setter_s
-
-    def createEnt(self) -> None:
-        parameters_dict = {
-            "__SCHEMA_PATH__": f"demo.{self.ENT}.{self.SCHEMA}",
-            "__ENT_SCHEMA__": self.SCHEMA,
-            "__INIT_WITH_DEFAULT__": self.getInitStringWithDefault(),
-            "__SET_FIELDS__": self.getSetFieldsString(),
-            "__FIELDS_GETTERS_SETTERS_METHODS__": self.getFieldsGetterAndSetterMethods(),
-        }
-        CodegenHelper.writeFile(
-            destined_path=f"./demo/{self.ENT}/{self.ENT}.py",
-            file_context=CodegenHelper.replace(self.ENT_PATH, parameters_dict),
-        )
