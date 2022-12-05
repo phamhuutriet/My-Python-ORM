@@ -5,7 +5,7 @@ from __SCHEMA_PATH__ import __ENT_SCHEMA__
 from typing import List
 
 
-class __ENT__(EntInterface):
+class User(EntInterface):
     def __init__(self, __INIT_WITH_DEFAULT__) -> None:
         self.id = 0
         self.schema = __ENT_SCHEMA__()
@@ -21,5 +21,22 @@ class __ENT__(EntInterface):
         self.id = id
 
     __FIELDS_GETTERS_SETTERS_METHODS__
+    def addFriend(self, friend: User) -> None:
+        self.friends.append(friend)
+
+    def getFriends(self) -> List[User]:
+        return self.friends
+
     def getEdges(self) -> dict[EntInterface, str]:
-        return {}
+        # Must have a generalized conversion
+        return {friend: "Friends" for friend in self.friends}
+
+    def __eq__(self, __o: User) -> bool:
+        return (
+            self.getID() == __o.getID()
+            and self.name == __o.name
+            and self.age == __o.age
+        )
+
+    def __hash__(self) -> int:
+        return hash((self.id, self.name, self.age))

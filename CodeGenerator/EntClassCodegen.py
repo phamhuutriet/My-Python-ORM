@@ -41,6 +41,7 @@ class EntClassCodegen:
             "__INIT_WITH_DEFAULT__": self.helper.getInitStringWithDefault(),
             "__SET_FIELDS__": self.helper.getSetFieldsString(),
             "__FIELDS_GETTERS_SETTERS_METHODS__": self.helper.getFieldsGetterAndSetterMethods(),
+            "__ENT__": self.ENT,
         }
         CodegenHelper.writeFile(
             destined_path=f"./demo/{self.ENT}/{self.ENT}.py",
