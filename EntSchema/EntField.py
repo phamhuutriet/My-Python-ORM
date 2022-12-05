@@ -18,5 +18,8 @@ class EntField:
     def getName(self) -> str:
         return self.name
 
+    def getType(self) -> EntFieldEnums:
+        return self.type
+
     def __eq__(self, __o: EntField) -> bool:
         return self.__dict__ == __o.__dict__

@@ -2,9 +2,9 @@ from enum import Enum
 
 
 class EntFieldEnums(Enum):
-    INT = "INT"
-    FLOAT = "FLOAT"
-    STRING = "STRING"
+    INT = "int"
+    FLOAT = "float"
+    STRING = "str"
     DATE = "DATE"
 
     # Null field name
