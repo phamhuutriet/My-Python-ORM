@@ -1,19 +1,17 @@
 from EntQuerier.EntQuerierInterface import EntQuerierInterface
 from EntSchema.EntSchemaInterface import EntSchemaInterface
-from demo.User.User import User
-from demo.User.UserSchema import UserSchema
 from Ent.EntInterface import EntInterface
+from __ENT_PATH__ import __ENT__
+from __SCHEMA_PATH__ import __ENT_SCHEMA__
 
 
-class UserQuerier(EntQuerierInterface):
+class __ENT__Querier(EntQuerierInterface):
     @staticmethod
     def processOneResult(result: dict) -> EntInterface:
-        user = User()
-        user.setName(result["name"])
-        user.setAge(result["age"])
-        user.setID(result["id"])
-        return user
+        ent = __ENT__(__INIT__)
+        ent.setID(result["id"])
+        return ent
 
     @staticmethod
     def getEntSchema() -> EntSchemaInterface:
-        return UserSchema()
+        return __ENT_SCHEMA__()
