@@ -1,9 +1,9 @@
-from demo.User.UserSchema import UserSchema
+from __SCHEMA_PATH__ import __SCHEMA__
 from CodeGenerator.EntClassCodegen import EntClassCodegen
 
 
 def main():
-    codegen_class = EntClassCodegen(schema=UserSchema())
+    codegen_class = EntClassCodegen(schema=__SCHEMA__())
     codegen_class.run()
 
 

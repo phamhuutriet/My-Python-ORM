@@ -1,8 +1,10 @@
+from CodeGenerator.CodegenHelper import CodegenHelper
 import sys
 import os
 
 
 def find(schema_name, path):
+    """Find the file with schema name and return its module path"""
     schema_file_name = schema_name + ".py"
     for root, dirs, files in os.walk(path):
         if schema_file_name in files:
@@ -21,7 +23,19 @@ def main():
         print("Invalid input")
         exit(2)
     else:
-        print(find(schema_name, "./"))
+        parameters_dict = {
+            "__SCHEMA_PATH__": find(schema_name, "./"),
+            "__SCHEMA__": schema_name,
+        }
+        CodegenHelper.writeFile(
+            destined_path="./codegenClass.py",
+            file_context=CodegenHelper.replace(
+                template_path="./CodeGenerator/templates/CodegenClassTemplate.txt",
+                parameter_dict=parameters_dict,
+            ),
+        )
+        os.system("python3 codegenClass.py")
+        os.remove("./codegenClass.py")
 
 
 if __name__ == "__main__":
