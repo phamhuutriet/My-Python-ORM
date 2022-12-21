@@ -1,6 +1,7 @@
 from enums.DatabaseEnums import DatabaseEnums
 from typing import List
 from Exceptions.NoRecordFound import NoRecordError
+from EntSchema.EntSchemaInterface import EntSchemaInterface
 import sqlite3
 
 
@@ -8,6 +9,12 @@ class SQLHelper:
     @staticmethod
     def getDatabasePath() -> str:
         return DatabaseEnums.DATABASE_PATH.value
+
+    @staticmethod
+    def createRelationshipTableString(
+        schema: EntSchemaInterface, relationship: str
+    ) -> str:
+        return f"{schema.getTableName()}_{relationship}"
 
     @staticmethod
     def initializeCursorAndConnection():
@@ -25,7 +32,8 @@ class SQLHelper:
             inserted_value_str: the string contains the inserted value in the form of VALUE in SQL
         """
         cursor, connection = SQLHelper.initializeCursorAndConnection()
-        cursor.execute(f"INSERT INTO {table_name} VALUES ({inserted_value_str});")
+        sql = f"INSERT INTO {table_name} VALUES ({inserted_value_str});"
+        cursor.execute(sql)
         connection.commit()
         cursor.execute("SELECT last_insert_rowid();")
         connection.commit()
@@ -101,10 +109,6 @@ class SQLHelper:
         return is_existed
 
     @staticmethod
-    def createRelationshipTableName(table_name1: str, table_name2: str) -> str:
-        return f"{table_name1}_{table_name2}({table_name1}, {table_name2})"
-
-    @staticmethod
     def createTable(table_name: str, table_description: str) -> None:
         """This methods create a table in the database
         Parameters:
@@ -168,4 +172,29 @@ class SQLHelper:
             for key, value in zip(fields, result):
                 record[key] = value
             ans[i] = record
+        return ans
+
+    @staticmethod
+    def queryOneEdge(
+        main_table_name: str,
+        edge: str,
+        filter_string: str,
+        fields: List[str],
+    ) -> dict:
+        cursor, connection = SQLHelper.initializeCursorAndConnection()
+        relationship_table = f"{main_table_name}_{edge}"
+        sql = f"""SELECT {SQLHelper.createTableFieldsString(fields)}
+                  FROM {main_table_name} JOIN {relationship_table} 
+                  ON {main_table_name}.id = {relationship_table}.{edge}
+                  WHERE {filter_string};
+                """
+        cursor.execute(sql)
+        connection.commit()
+        result = cursor.fetchone()
+        connection.close()
+        if not result:
+            raise NoRecordError
+        ans = {}
+        for key, value in zip(fields, result):
+            ans[key] = value
         return ans

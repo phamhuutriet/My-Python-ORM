@@ -207,3 +207,20 @@ class TestUser(TestCase):
         filter = PredicatorBuilder.equalInt("age", 200)
         results = sorted(UserQuerier.queryMany(filter), key=lambda x: x.getID())
         self.assertEqual(results, [NullEnt()])
+
+    @patch("EntMutator.SQLHelper.SQLHelper.getDatabasePath")
+    def testQueryOneFriend(self, mocked_get_path: MagicMock):
+        mocked_get_path.return_value = DatabaseEnums.TEST_DATABASE_PATH.value
+        user = User("Triet", 23)
+        friend = User("Huan", 24)
+        user.addFriend(friend)
+        UserMutator.create(user)
+
+        fetched_friend = UserQuerier.getOneFriend(PredicatorBuilder.equalInt("age", 24))
+        self.assertEqual(fetched_friend, friend)
+
+        friend2 = User("Hung", 23)
+        user.addFriend(friend2)
+        UserMutator.update(user)
+        fetched_friend = UserQuerier.getOneFriend(PredicatorBuilder.equalInt("age", 23))
+        self.assertEqual(fetched_friend, friend2)

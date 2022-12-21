@@ -50,6 +50,22 @@ class EntMutatorInterface(ABC):
             updated_string=SQLHelper.createUpdateString(ent.toDict()),
             id=ent.getID(),
         )
+        EntMutatorInterface.updateEdge(ent=ent, edges=ent.getEdges())
+
+    @staticmethod
+    def updateEdge(ent: EntInterface, edges: dict[EntInterface, str]) -> None:
+        "This method update existing edge and create new edge"
+        for edge_object, edge_name in edges.items():
+            if not SQLHelper.isExistInTable(
+                edge_object.getEntSchema().tableName().value, edge_object.getID()
+            ):
+                EntMutatorInterface.createEdge(ent, {edge_object: edge_name})
+            else:
+                SQLHelper.updateToTable(
+                    table_name=edge_object.getEntSchema().getTableName(),
+                    updated_string=SQLHelper.createUpdateString(edge_object.toDict()),
+                    id=edge_object.getID(),
+                )
 
     @staticmethod
     def delete(ent: EntInterface) -> None:

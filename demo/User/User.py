@@ -53,3 +53,8 @@ class User(EntInterface):
 
     def __hash__(self) -> int:
         return hash((self.id, self.name, self.age))
+
+    def populateFields(self, data: dict) -> None:
+        self.name = data["name"]
+        self.age = data["age"]
+        self.id = data["id"]

@@ -32,3 +32,7 @@ class EntInterface(ABC):
             field: self_dict[field] if field in self_dict else None
             for field in self.getFieldsNames()
         }
+
+    @abstractmethod
+    def populateFields(self, data: dict) -> None:
+        """Populate the object, another way of initialize"""

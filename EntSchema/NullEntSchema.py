@@ -1,6 +1,7 @@
 from EntSchema.EntSchemaInterface import EntSchemaInterface
 from EntSchema.EntField import EntField
 from EntSchema.EntEdge import EntEdge
+from enums.DatabaseEnums import DatabaseEnums
 from typing import List
 
 
@@ -16,3 +17,6 @@ class NullEntSchema(EntSchemaInterface):
 
     def getEdges(self) -> List[EntEdge]:
         return []
+
+    def tableName(self) -> DatabaseEnums:
+        return DatabaseEnums.NULL

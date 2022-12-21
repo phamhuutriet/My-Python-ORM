@@ -6,6 +6,7 @@ from EntSchema.EntSchemaInterface import EntSchemaInterface
 from Ent.EntInterface import EntInterface
 from Ent.NullEnt import NullEnt
 from EntQuerier.Predicator import Predicator
+from EntSchema.EntFactory import EntFactory
 
 
 class EntQuerierInterface(ABC):
@@ -34,6 +35,29 @@ class EntQuerierInterface(ABC):
             return cls.processManyResults(results)
         except NoRecordError:
             return [NullEnt()]
+
+    @classmethod
+    def queryOneEdge(
+        cls, edge: EntSchemaInterface, filter: Predicator, relationship: str
+    ) -> EntInterface:
+        """This method help queries edge specifically"""
+        try:
+            result = SQLHelper.queryOneEdge(
+                main_table_name=cls.getEntSchema().getTableName(),
+                edge=relationship,
+                filter_string=str(filter),
+                fields=edge.getFieldsNames() + ["id"],
+            )
+            return cls.processEdge(edge, result)
+        except NoRecordError:
+            return NullEnt()
+
+    @classmethod
+    def processEdge(cls, edge: EntSchemaInterface, result: dict) -> EntInterface:
+        """This method pass the result into an edge object"""
+        ent = EntFactory.buildEnt(schema=edge)
+        ent.populateFields(result)
+        return ent
 
     @staticmethod
     @abstractmethod

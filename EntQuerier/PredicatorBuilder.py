@@ -47,3 +47,7 @@ class PredicatorBuilder:
         p1.setNested()
         p2.setNested()
         return Predicator(p1, relationship, p2)
+
+    @staticmethod
+    def emptyFilter() -> Predicator:
+        return Predicator("1", PredicatorEnums.EQUAL, 1)

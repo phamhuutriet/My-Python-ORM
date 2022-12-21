@@ -9,7 +9,7 @@ class NullEnt(EntInterface):
         return NullEntSchema()
 
     def getID(self) -> int:
-        return 0
+        return -1
 
     def setID(self, id: int) -> None:
         pass
@@ -17,5 +17,8 @@ class NullEnt(EntInterface):
     def getEdges(self) -> dict[EntInterface, str]:
         return {}
 
-    def __eq__(self, __o: NullEnt) -> bool:
+    def __eq__(self, __o: EntInterface) -> bool:
         return self.getID() == __o.getID()
+
+    def populateFields(self, data: dict) -> None:
+        return
