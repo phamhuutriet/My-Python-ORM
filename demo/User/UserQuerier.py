@@ -5,7 +5,7 @@ from demo.User.UserSchema import UserSchema
 from EntQuerier.Predicator import Predicator
 from Ent.EntInterface import EntInterface
 from EntQuerier.PredicatorBuilder import PredicatorBuilder
-from EntMutator.SQLHelper import SQLHelper
+from typing import List
 
 
 class UserQuerier(EntQuerierInterface):
@@ -21,10 +21,27 @@ class UserQuerier(EntQuerierInterface):
 
     @staticmethod
     def getOneFriend(
+        owner_id: int,
         filter: Predicator = PredicatorBuilder.emptyFilter(),
-    ) -> EntInterface:
-        return UserQuerier.queryOneEdge(
+    ) -> User:
+        user = UserQuerier.queryOneEdge(
+            owner_id=owner_id,
             edge=UserSchema(),
             filter=filter,
             relationship="Friends",
         )
+        if isinstance(user, User):
+            return user
+        raise TypeError
+
+    @staticmethod
+    def getManyFriends(
+        owner_id: int,
+        filter: Predicator = PredicatorBuilder.emptyFilter(),
+    ) -> List[User]:
+        results = UserQuerier.queryManyEdges(
+            owner_id=owner_id, edge=UserSchema(), filter=filter, relationship="Friends"
+        )
+        if all(isinstance(result, User) for result in results):
+            return results
+        raise TypeError

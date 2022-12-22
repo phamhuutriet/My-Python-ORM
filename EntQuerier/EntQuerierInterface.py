@@ -38,12 +38,17 @@ class EntQuerierInterface(ABC):
 
     @classmethod
     def queryOneEdge(
-        cls, edge: EntSchemaInterface, filter: Predicator, relationship: str
+        cls,
+        owner_id: int,
+        edge: EntSchemaInterface,
+        filter: Predicator,
+        relationship: str,
     ) -> EntInterface:
         """This method help queries edge specifically"""
         try:
             result = SQLHelper.queryOneEdge(
                 main_table_name=cls.getEntSchema().getTableName(),
+                owner_id=owner_id,
                 edge=relationship,
                 filter_string=str(filter),
                 fields=edge.getFieldsNames() + ["id"],
@@ -53,11 +58,37 @@ class EntQuerierInterface(ABC):
             return NullEnt()
 
     @classmethod
+    def queryManyEdges(
+        cls,
+        owner_id: int,
+        edge: EntSchemaInterface,
+        filter: Predicator,
+        relationship: str,
+    ) -> List[EntInterface]:
+        try:
+            results = SQLHelper.queryManyEdges(
+                main_table_name=cls.getEntSchema().getTableName(),
+                owner_id=owner_id,
+                edge=relationship,
+                filter_string=str(filter),
+                fields=edge.getFieldsNames() + ["id"],
+            )
+            return cls.processManyEdges(results, edge)
+        except NoRecordError:
+            return [NullEnt()]
+
+    @classmethod
     def processEdge(cls, edge: EntSchemaInterface, result: dict) -> EntInterface:
         """This method pass the result into an edge object"""
         ent = EntFactory.buildEnt(schema=edge)
         ent.populateFields(result)
         return ent
+
+    @classmethod
+    def processManyEdges(
+        cls, results: List[dict], edge: EntSchemaInterface
+    ) -> List[EntInterface]:
+        return list(cls.processEdge(edge, result) for result in results)
 
     @staticmethod
     @abstractmethod

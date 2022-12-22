@@ -68,6 +68,17 @@ class EntMutatorInterface(ABC):
                 )
 
     @staticmethod
+    def deleteEdge(ent: EntInterface, edge: EntInterface, relationship: str) -> None:
+        "This method help delete an edge of an ent"
+        SQLHelper.deleteEdge(
+            main_table_name=ent.getEntSchema().getTableName(),
+            owner_id=ent.getID(),
+            edge_id=edge.getID(),
+            edge=relationship,
+        )
+        EntMutatorInterface.delete(edge)
+
+    @staticmethod
     def delete(ent: EntInterface) -> None:
         """This method delete the ent in the database"""
         SQLHelper.deleteRecordFromTable(

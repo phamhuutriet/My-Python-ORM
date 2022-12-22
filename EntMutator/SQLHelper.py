@@ -177,6 +177,7 @@ class SQLHelper:
     @staticmethod
     def queryOneEdge(
         main_table_name: str,
+        owner_id: int,
         edge: str,
         filter_string: str,
         fields: List[str],
@@ -184,9 +185,12 @@ class SQLHelper:
         cursor, connection = SQLHelper.initializeCursorAndConnection()
         relationship_table = f"{main_table_name}_{edge}"
         sql = f"""SELECT {SQLHelper.createTableFieldsString(fields)}
-                  FROM {main_table_name} JOIN {relationship_table} 
-                  ON {main_table_name}.id = {relationship_table}.{edge}
-                  WHERE {filter_string};
+                  FROM {main_table_name}
+                  WHERE id IN (
+                    SELECT {edge} AS id 
+                    FROM {relationship_table} 
+                    WHERE {main_table_name} = {owner_id} AND {filter_string}
+                  );
                 """
         cursor.execute(sql)
         connection.commit()
@@ -198,3 +202,45 @@ class SQLHelper:
         for key, value in zip(fields, result):
             ans[key] = value
         return ans
+
+    @staticmethod
+    def queryManyEdges(
+        main_table_name: str,
+        owner_id: int,
+        edge: str,
+        filter_string: str,
+        fields: List[str],
+    ) -> List[dict]:
+        cursor, connection = SQLHelper.initializeCursorAndConnection()
+        relationship_table = f"{main_table_name}_{edge}"
+        sql = f"""SELECT {SQLHelper.createTableFieldsString(fields)}
+                  FROM {main_table_name}
+                  WHERE id IN (
+                    SELECT {edge} AS id 
+                    FROM {relationship_table} 
+                    WHERE {main_table_name} = {owner_id} AND {filter_string}
+                  );
+                """
+        cursor.execute(sql)
+        connection.commit()
+        ans = list(cursor.fetchall())
+        connection.close()
+        if len(ans) == 0:
+            raise NoRecordError
+        for i, result in enumerate(ans):
+            record = {}
+            for key, value in zip(fields, result):
+                record[key] = value
+            ans[i] = record
+        return ans
+
+    @staticmethod
+    def deleteEdge(
+        main_table_name: str, owner_id: int, edge_id: int, edge: str
+    ) -> None:
+        cursor, connection = SQLHelper.initializeCursorAndConnection()
+        relationship_table = f"{main_table_name}_{edge}"
+        sql = f"""DELETE FROM {relationship_table} 
+                  WHERE {main_table_name} = {owner_id} AND {edge} = {edge_id};"""
+        cursor.execute(sql)
+        connection.commit()

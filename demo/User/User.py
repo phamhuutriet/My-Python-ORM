@@ -37,6 +37,9 @@ class User(EntInterface):
     def addFriend(self, friend: User) -> None:
         self.friends.append(friend)
 
+    def removeFriend(self, friend: User) -> None:
+        self.friends.remove(friend)
+
     def getFriends(self) -> List[User]:
         return self.friends
 

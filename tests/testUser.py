@@ -27,7 +27,7 @@ class TestUser(TestCase):
         # Relationship table
         SQLHelper.createTable(
             table_name=f"{const_user.getEntSchema().getTableName()}_Friends",
-            table_description="USER integer, Friends integer",
+            table_description="User integer, Friends integer",
         )
 
     def tearDown(self) -> None:
@@ -216,11 +216,88 @@ class TestUser(TestCase):
         user.addFriend(friend)
         UserMutator.create(user)
 
-        fetched_friend = UserQuerier.getOneFriend(PredicatorBuilder.equalInt("age", 24))
+        fetched_friend = UserQuerier.getOneFriend(owner_id=user.getID())
         self.assertEqual(fetched_friend, friend)
 
         friend2 = User("Hung", 23)
         user.addFriend(friend2)
         UserMutator.update(user)
-        fetched_friend = UserQuerier.getOneFriend(PredicatorBuilder.equalInt("age", 23))
+        fetched_friend = UserQuerier.getOneFriend(
+            owner_id=user.getID(), filter=PredicatorBuilder.equalInt("age", 23)
+        )
         self.assertEqual(fetched_friend, friend2)
+
+    @patch("EntMutator.SQLHelper.SQLHelper.getDatabasePath")
+    def testQueryManyFriends(self, mocked_get_path: MagicMock):
+        mocked_get_path.return_value = DatabaseEnums.TEST_DATABASE_PATH.value
+        # Initialize data
+        user = User("Triet", 23)
+        friend_list = [User("Huan", 24), User("Hung", 22), User("Mai", 23)]
+        for friend in friend_list:
+            user.addFriend(friend)
+        UserMutator.create(user)
+
+        # Test query after create
+        friends = UserQuerier.getManyFriends(owner_id=user.getID())
+        self.assertEqual(
+            sorted(user.getFriends(), key=lambda x: x.getID()),
+            sorted(friends, key=lambda x: x.getID()),
+        )
+
+        # Test query after update
+        user.addFriend(User("Duy", 20))
+        UserMutator.update(user)
+        friends = UserQuerier.getManyFriends(
+            owner_id=user.getID(), filter=PredicatorBuilder.greaterThanInt("age", 10)
+        )
+        self.assertEqual(
+            sorted(user.getFriends(), key=lambda x: x.getID()),
+            sorted(friends, key=lambda x: x.getID()),
+        )
+
+        # Test query single edge with condition
+        query_friend = UserQuerier.getOneFriend(
+            owner_id=user.getID(), filter=PredicatorBuilder.equalInt("age", 23)
+        )
+        self.assertEqual(query_friend.getName(), "Mai")
+
+    @patch("EntMutator.SQLHelper.SQLHelper.getDatabasePath")
+    def testDeleteEdge(self, mocked_get_path: MagicMock):
+        mocked_get_path.return_value = DatabaseEnums.TEST_DATABASE_PATH.value
+        # Initialize data
+        user = User("Triet", 23)
+        friend = User("Huan", 23)
+        user.addFriend(friend)
+        UserMutator.create(user)
+        self.assertTrue(
+            MockDatabase.isExistInTable(
+                table_name=user.getEntSchema().getTableName(), id=user.getID()
+            )
+        )
+
+        # Remove a friend
+        UserMutator.removeFriend(user, friend)
+        self.assertFalse(
+            MockDatabase.isExistInTable(
+                table_name=friend.getEntSchema().getTableName(), id=friend.getID()
+            )
+        )
+        self.assertEqual(len(user.getFriends()), 0)
+
+    @patch("EntMutator.SQLHelper.SQLHelper.getDatabasePath")
+    def testQueryInteragtionTest(self, mocked_get_path: MagicMock):
+        mocked_get_path.return_value = DatabaseEnums.TEST_DATABASE_PATH.value
+        # Initialize data
+        user = User("Triet", 23)
+        friend_list = [User("Huan", 24), User("Hung", 22), User("Mai", 23)]
+        for friend in friend_list:
+            user.addFriend(friend)
+        UserMutator.persist(user)
+
+        # Test query after persist
+        self.assertEqual(
+            UserQuerier.queryOne(PredicatorBuilder.equalString("name", "Triet")), user
+        )
+
+        user.addFriend(User("Duy", 22))
+        UserMutator.persist(user)
